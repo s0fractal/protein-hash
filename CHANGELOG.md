@@ -7,12 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-08-28
+
+### Improved
+- Better operation differentiation (+ vs - vs * vs /)
+- Enhanced AST node classification
+- Arrow function support
+- Binary expression handling with operator detection
+
+### Fixed
+- Float comparison precision in tests
+- Empty code handling
+- Whitespace normalization
+
 ### Added
 - GitHub Actions for CI/CD
 - Contributing guidelines
 - Issue templates
 - Code of conduct
 - Automated npm publishing workflow
+
+### Known Issues
+- Some semantic equivalence detection still needs work
+- Grouping similar functions needs tuning
+- Power iteration eigenvalue extraction can be improved
 
 ## [0.1.0] - 2025-08-28
 
