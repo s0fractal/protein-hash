@@ -112,7 +112,7 @@ export class ProteinHasher {
       let nodeType: GraphNode['type'] = 'operation';
       let label = ts.SyntaxKind[node.kind];
       
-      if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
+      if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
         nodeType = 'pure'; // Assume pure until proven otherwise
         label = 'Function';
       } else if (ts.isIdentifier(node)) {
@@ -121,16 +121,27 @@ export class ProteinHasher {
       } else if (ts.isLiteralExpression(node)) {
         nodeType = 'data';
         label = 'Literal';
-      } else if (ts.isIfStatement(node) || ts.isForStatement(node)) {
+      } else if (ts.isIfStatement(node) || ts.isForStatement(node) || ts.isWhileStatement(node)) {
         nodeType = 'control';
+        label = `Control:${ts.SyntaxKind[node.kind]}`;
+      } else if (ts.isBinaryExpression(node)) {
+        // Differentiate between operations!
+        nodeType = 'operation';
+        const operator = node.operatorToken.getText();
+        label = `BinaryOp:${operator}`;
+      } else if (ts.isReturnStatement(node)) {
+        label = 'Return';
+      } else if (ts.isCallExpression(node)) {
+        label = 'Call';
       }
       
-      // Add node to graph
+      // Add node to graph with weight based on operation complexity
+      const weight = this.getNodeWeight(label);
       graph.nodes.set(nodeId, {
         id: nodeId,
         type: nodeType,
         label,
-        weight: 1.0
+        weight
       });
       
       // Visit children and create edges
@@ -153,6 +164,25 @@ export class ProteinHasher {
     
     visit(sourceFile);
     return graph;
+  }
+  
+  /**
+   * Get node weight based on operation type
+   */
+  private getNodeWeight(label: string): number {
+    // Different operations have VERY different weights for better distinction
+    if (label.includes('BinaryOp:+')) return 1.0;
+    if (label.includes('BinaryOp:-')) return 2.0;  // Much different from +
+    if (label.includes('BinaryOp:*')) return 3.0;  // Much different from +/-
+    if (label.includes('BinaryOp:/')) return 4.0;  // Much different from *
+    if (label.includes('BinaryOp:%')) return 5.0;
+    if (label.includes('BinaryOp:**')) return 6.0;
+    if (label.includes('Control')) return 10.0;
+    if (label.includes('Call')) return 15.0;
+    if (label.includes('Function')) return 0.5;
+    if (label.includes('Return')) return 0.8;
+    if (label.includes('Literal')) return 0.3;
+    return 1.0;
   }
   
   /**
@@ -234,6 +264,12 @@ export class ProteinHasher {
    * Convert spectrum to hash
    */
   private spectrumToHash(eigenvalues: number[]): string {
+    // Handle empty case
+    if (eigenvalues.length === 0) {
+      const emptyHash = createHash('sha256').update('empty').digest('hex');
+      return `phash:v1:sha256:${emptyHash.substring(0, 16)}`;
+    }
+    
     // Quantize eigenvalues
     const quantized = eigenvalues.map(e => 
       Math.round(e * this.QUANTIZATION_LEVELS) / this.QUANTIZATION_LEVELS
