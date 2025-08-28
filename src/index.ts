@@ -25,7 +25,8 @@ export {
 export {
   compareHashes,
   isSemanticallyEquivalent,
-  computeSimilarity
+  computeSimilarity,
+  groupBySimilarity
 } from './comparison';
 
 export * from './types';
