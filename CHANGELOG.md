@@ -1,0 +1,48 @@
+# Changelog
+
+All notable changes to Protein Hash will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- GitHub Actions for CI/CD
+- Contributing guidelines
+- Issue templates
+- Code of conduct
+- Automated npm publishing workflow
+
+## [0.1.0] - 2025-08-28
+
+### Added
+- Initial implementation of Protein Hash algorithm
+- TypeScript/JavaScript AST parsing
+- Graph-based semantic analysis
+- Eigenvalue spectrum computation
+- Similarity comparison functions
+- Semantic equivalence detection
+- Group by similarity functionality
+- Comprehensive test suite
+- Example demonstrating semantic twins
+- Full TypeScript support with type definitions
+
+### Technical Details
+- Laplacian matrix eigenvalue extraction
+- Power iteration for spectral analysis  
+- McCabe complexity approximation
+- Semantic purity scoring
+- Quantized spectrum hashing
+
+### Known Limitations
+- Only TypeScript/JavaScript supported
+- Simple eigenvalue extraction (power iteration)
+- Some false positives for structural similarity
+
+---
+
+*"Code is not text. Code is structure. Structure is meaning."*
+
+[Unreleased]: https://github.com/s0fractal/protein-hash/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/s0fractal/protein-hash/releases/tag/v0.1.0

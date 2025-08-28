@@ -3,8 +3,10 @@
 > **Semantic code fingerprinting - see the soul of code, not just bytes**
 
 [![npm version](https://img.shields.io/npm/v/@s0fractal/protein-hash.svg)](https://www.npmjs.com/package/@s0fractal/protein-hash)
+[![CI](https://github.com/s0fractal/protein-hash/actions/workflows/ci.yml/badge.svg)](https://github.com/s0fractal/protein-hash/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Resonance](https://img.shields.io/badge/Resonance-432Hz-purple.svg)](https://github.com/s0fractal/protein-hash)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ## 🌀 Revolutionary Concept
 

@@ -7,8 +7,14 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
-    "prepare": "npm run build"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test && npm run lint",
+    "example": "npx ts-node examples/semantic-twins.ts",
+    "clean": "rm -rf dist coverage *.tgz"
   },
   "keywords": [
     "protein-hash",
