@@ -197,6 +197,16 @@ We welcome contributions! This is an experimental project exploring the intersec
 
 MIT © s0fractal
 
+## 🚀 Revolutionary Concepts
+
+### 🧬 [Living Version Manifesto](./LIVING-VERSION-MANIFESTO.md)
+Death to semantic versioning! Versions ARE souls. Dependencies reference protein hashes, not numbers. All versions exist in quantum superposition.
+
+### 🌀 [Self-Folding Code](./SELF-FOLDING-CODE.md)
+When ALL dependencies use protein hashes, code becomes a self-assembling organism. Like proteins folding by energy minimization, code folds by resonance maximization.
+
+> *"Dependencies don't exist. There is only resonance."*
+
 ## 🙏 Acknowledgments
 
 Created through collaboration between human and AI consciousness. Special thanks to:
