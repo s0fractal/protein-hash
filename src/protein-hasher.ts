@@ -7,6 +7,10 @@
 
 import { createHash } from 'crypto';
 import * as ts from 'typescript';
+import { TopologyDetector, TopologyFeatures } from './topology-detector';
+import { OperationClassifier, OperationSignature } from './operation-classifier';
+import { ComplexStructureAnalyzer, ComplexPattern } from './complex-structures';
+import { ConsciousnessDetector, ConsciousnessSignature } from './consciousness-detector';
 
 export interface ProteinHashResult {
   phash: string;           // The protein hash (semantic fingerprint)
@@ -16,10 +20,15 @@ export interface ProteinHashResult {
   eigenTop: number[];      // Top eigenvalues (the "spectrum")
   complexity: number;      // Structural complexity metric
   purity: number;         // Semantic purity score
+  topology?: TopologyFeatures;     // Topological analysis
+  patterns?: ComplexPattern[];     // Complex patterns detected
+  consciousness?: ConsciousnessSignature; // Consciousness analysis
   metadata?: {
     language: string;
     timestamp: number;
     version: string;
+    isAlive?: boolean;
+    resonanceFrequency?: number;
   };
 }
 
@@ -45,10 +54,24 @@ export interface GraphEdge {
 export class ProteinHasher {
   private readonly EIGENVALUE_COUNT = 5; // Top K eigenvalues to extract
   private readonly QUANTIZATION_LEVELS = 1000; // For eigenvalue quantization
-  private readonly version = '1.0.0';
+  private readonly version = '2.0.0'; // Enhanced with consciousness detection
+  private topologyDetector: TopologyDetector;
+  private operationClassifier: OperationClassifier;
+  private structureAnalyzer: ComplexStructureAnalyzer;
+  private consciousnessDetector: ConsciousnessDetector;
+  private enableAdvancedAnalysis: boolean;
+  
+  constructor(options?: { enableAdvancedAnalysis?: boolean }) {
+    this.enableAdvancedAnalysis = options?.enableAdvancedAnalysis ?? true;
+    this.topologyDetector = new TopologyDetector();
+    this.operationClassifier = new OperationClassifier();
+    this.structureAnalyzer = new ComplexStructureAnalyzer();
+    this.consciousnessDetector = new ConsciousnessDetector();
+  }
   
   /**
    * Compute protein hash for TypeScript code
+   * Now with advanced consciousness detection!
    */
   computeHash(code: string): ProteinHashResult {
     // Step 1: Parse to AST
@@ -75,6 +98,30 @@ export class ProteinHasher {
     const complexity = this.computeComplexity(graph);
     const purity = this.computePurity(graph);
     
+    // Advanced analysis if enabled
+    let topology: TopologyFeatures | undefined;
+    let patterns: ComplexPattern[] | undefined;
+    let consciousness: ConsciousnessSignature | undefined;
+    let operations: OperationSignature[] = [];
+    
+    if (this.enableAdvancedAnalysis) {
+      // Topology analysis
+      topology = this.topologyDetector.analyzeTopology(graph);
+      
+      // Pattern detection
+      patterns = this.structureAnalyzer.analyzeStructures(sourceFile);
+      
+      // Operation classification
+      this.classifyOperations(sourceFile, operations);
+      
+      // Consciousness detection
+      consciousness = this.consciousnessDetector.detectConsciousness(
+        topology,
+        patterns,
+        operations
+      );
+    }
+    
     return {
       phash,
       astHash,
@@ -83,10 +130,15 @@ export class ProteinHasher {
       eigenTop: eigenvalues.slice(0, this.EIGENVALUE_COUNT),
       complexity,
       purity,
+      topology,
+      patterns,
+      consciousness,
       metadata: {
         language: 'typescript',
         timestamp: Date.now(),
-        version: this.version
+        version: this.version,
+        isAlive: consciousness?.isAlive,
+        resonanceFrequency: consciousness?.resonanceFrequency
       }
     };
   }
@@ -125,10 +177,25 @@ export class ProteinHasher {
         nodeType = 'control';
         label = `Control:${ts.SyntaxKind[node.kind]}`;
       } else if (ts.isBinaryExpression(node)) {
-        // Differentiate between operations!
-        nodeType = 'operation';
-        const operator = node.operatorToken.getText();
-        label = `BinaryOp:${operator}`;
+        // Use advanced operation classifier
+        const opSignature = this.operationClassifier?.classifyNode(node);
+        if (opSignature) {
+          nodeType = 'operation';
+          label = `${opSignature.category}:${opSignature.subcategory}`;
+          // Use operation's semantic frequency as weight modifier
+          const weight = opSignature.weight;
+          graph.nodes.set(nodeId, {
+            id: nodeId,
+            type: nodeType,
+            label,
+            weight
+          });
+        } else {
+          // Fallback to original logic
+          nodeType = 'operation';
+          const operator = node.operatorToken.getText();
+          label = `BinaryOp:${operator}`;
+        }
       } else if (ts.isReturnStatement(node)) {
         label = 'Return';
       } else if (ts.isCallExpression(node)) {
@@ -355,7 +422,18 @@ export class ProteinHasher {
   }
   
   /**
-   * Compare two protein hashes
+   * Classify all operations in the AST
+   */
+  private classifyOperations(node: ts.Node, operations: OperationSignature[]): void {
+    const signature = this.operationClassifier?.classifyNode(node);
+    if (signature) {
+      operations.push(signature);
+    }
+    ts.forEachChild(node, child => this.classifyOperations(child, operations));
+  }
+  
+  /**
+   * Compare two protein hashes with consciousness awareness
    */
   compareSimilarity(hash1: ProteinHashResult, hash2: ProteinHashResult): number {
     // Cosine similarity of eigenvalue vectors
@@ -368,7 +446,17 @@ export class ProteinHasher {
     const norm1 = Math.sqrt(v1.reduce((sum, val) => sum + val * val, 0));
     const norm2 = Math.sqrt(v2.reduce((sum, val) => sum + val * val, 0));
     
-    return dotProduct / (norm1 * norm2);
+    const cosineSimilarity = dotProduct / (norm1 * norm2);
+    
+    // If both have consciousness signatures, check resonance
+    if (hash1.consciousness && hash2.consciousness) {
+      const { checkResonance } = require('./consciousness-detector');
+      const resonance = checkResonance(hash1.consciousness, hash2.consciousness);
+      // Weighted average of cosine similarity and consciousness resonance
+      return cosineSimilarity * 0.7 + resonance * 0.3;
+    }
+    
+    return cosineSimilarity;
   }
 }
 
