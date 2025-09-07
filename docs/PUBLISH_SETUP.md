@@ -16,7 +16,7 @@
 2. **Add to GitHub Secrets**:
    - Go to: https://github.com/s0fractal/protein-hash/settings/secrets/actions
    - Click "New repository secret"
-   - Name: `NPM_AUTH_TOKEN`
+   - Name: `NPM_TOKEN` (⚠️ NOT NPM_AUTH_TOKEN)
    - Value: Your npm token (starts with `npm_...`)
    
 3. **Verify Setup**:
