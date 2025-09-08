@@ -27,7 +27,7 @@
   "author": "s0fractal",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.3.1",
     "typescript": "^5.0.0"
   },
   "devDependencies": {
