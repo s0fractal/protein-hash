@@ -179,11 +179,20 @@ export class ProteinHasher {
       } else if (ts.isBinaryExpression(node)) {
         // Use advanced operation classifier
         const opSignature = this.operationClassifier?.classifyNode(node);
+        // DEBUG
+        if (!opSignature && process.env.DEBUG_PROTEIN) {
+          console.log('  WARNING: classifyNode returned null for binary expression');
+          console.log('    Operator:', node.operatorToken?.getText());
+        }
         if (opSignature) {
           nodeType = 'operation';
           label = `${opSignature.category}:${opSignature.subcategory}`;
           // Use operation's semantic frequency as weight modifier
           const weight = opSignature.weight;
+          // DEBUG
+          if (process.env.DEBUG_PROTEIN) {
+            console.log(`  Using classifier: ${label} with weight ${weight}`);
+          }
           graph.nodes.set(nodeId, {
             id: nodeId,
             type: nodeType,
@@ -193,23 +202,47 @@ export class ProteinHasher {
         } else {
           // Fallback to original logic
           nodeType = 'operation';
-          const operator = node.operatorToken.getText();
+          const operator = node.operatorToken?.getText() || '?';
           label = `BinaryOp:${operator}`;
+          // FIXED: Add node to graph here too!
+          const weight = this.getNodeWeight(label);
+          graph.nodes.set(nodeId, {
+            id: nodeId,
+            type: nodeType,
+            label,
+            weight
+          });
         }
       } else if (ts.isReturnStatement(node)) {
         label = 'Return';
+        // Add node to graph
+        const weight = this.getNodeWeight(label);
+        graph.nodes.set(nodeId, {
+          id: nodeId,
+          type: nodeType,
+          label,
+          weight
+        });
       } else if (ts.isCallExpression(node)) {
         label = 'Call';
+        // Add node to graph
+        const weight = this.getNodeWeight(label);
+        graph.nodes.set(nodeId, {
+          id: nodeId,
+          type: nodeType,
+          label,
+          weight
+        });
+      } else {
+        // For any other node type, still add it to graph
+        const weight = this.getNodeWeight(label);
+        graph.nodes.set(nodeId, {
+          id: nodeId,
+          type: nodeType,
+          label,
+          weight
+        });
       }
-      
-      // Add node to graph with weight based on operation complexity
-      const weight = this.getNodeWeight(label);
-      graph.nodes.set(nodeId, {
-        id: nodeId,
-        type: nodeType,
-        label,
-        weight
-      });
       
       // Visit children and create edges
       const childIds: string[] = [];
@@ -263,16 +296,25 @@ export class ProteinHasher {
     // Build adjacency matrix
     const nodeArray = Array.from(graph.nodes.keys());
     const nodeIndex = new Map(nodeArray.map((id, i) => [id, i]));
-    
-    // Simple adjacency matrix (for prototype)
+    const nodesMap = graph.nodes;
+
+    // FIXED: Include node weights in adjacency matrix!
     const matrix: number[][] = Array(n).fill(0).map(() => Array(n).fill(0));
-    
+
     for (const edge of graph.edges) {
       const i = nodeIndex.get(edge.from);
       const j = nodeIndex.get(edge.to);
       if (i !== undefined && j !== undefined) {
-        matrix[i][j] = edge.weight;
-        matrix[j][i] = edge.weight; // Make symmetric for simplicity
+        // Weight edges by the product of node weights
+        const fromNode = nodesMap.get(edge.from);
+        const toNode = nodesMap.get(edge.to);
+        const nodeWeightProduct = (fromNode?.weight || 1) * (toNode?.weight || 1);
+
+        // Combine edge weight with node weights
+        const combinedWeight = edge.weight * Math.sqrt(nodeWeightProduct);
+
+        matrix[i][j] = combinedWeight;
+        matrix[j][i] = combinedWeight; // Make symmetric for simplicity
       }
     }
     
